@@ -8,7 +8,7 @@ import { NavLink } from 'react-router-dom';
 function Footer() {
   return (
     <footer className="pt-24 pb-12 bg-white border-t border-gray-100 px-24">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-20">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-20 mb-20">
         {/* Brand Column */}
         <div className="flex flex-col gap-8">
           <img src="/logo.png" alt="Codescape Logo" className="h-8 w-auto self-start" />
@@ -54,6 +54,19 @@ function Footer() {
             {["App Development", "Web Design", "QA Testing", "Cloud Infrastructure"].map(link => (
               <li key={link}><a href="#" className="text-gray-900 font-bold text-sm tracking-tight hover:text-gray-500 transition-colors">{link}</a></li>
             ))}
+          </ul>
+        </div>
+
+        {/* Opportunities Column */}
+        <div>
+          <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-10">Opportunities</h4>
+          <ul className="flex flex-col gap-5">
+            <li>
+              <NavLink to="/careers" className="text-gray-900 font-bold text-sm tracking-tight hover:text-gray-500 transition-colors">
+                Careers
+              </NavLink>
+            </li>
+
           </ul>
         </div>
       </div>
