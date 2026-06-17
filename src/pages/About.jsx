@@ -16,15 +16,15 @@ function About() {
   ];
 
   const team = [
-    { name: "John Doe", role: "Founder & CEO", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=600" },
-    { name: "Jane Smith", role: "Creative Director", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600" },
-    { name: "Mike Johnson", role: "CTO", img: "https://images.unsplash.com/photo-1506794778242-92bb52bd3586?auto=format&fit=crop&q=80&w=600" },
-    { name: "Sarah Williams", role: "Head of Strategy", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=600" }
+    { name: "Arjun ", role: "Founder & CEO", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=600" },
+    { name: "Priya ", role: "Creative Director", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600" },
+    { name: "Rahul", role: "CTO", img: "https://images.unsplash.com/photo-1506794778242-92bb52bd3586?auto=format&fit=crop&q=80&w=600" },
+    { name: "Ananya", role: "Head of Strategy", img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=600" }
   ];
 
   return (
     <div className="bg-white min-h-screen selection:bg-blue-600 selection:text-white">
-      
+
       {/* Background Atmosphere */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[20%] right-[-5%] w-[40%] h-[40%] bg-blue-50/30 rounded-full blur-[120px] animate-pulse" />
@@ -83,7 +83,7 @@ function About() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
             {values.map((v, i) => (
               <div key={i} className={`group bg-white p-12 lg:p-16 rounded-[60px] shadow-2xl shadow-blue-500/5 ${v.offset} hover:-translate-y-4 transition-all duration-700`}>
-                <span className="text-[10px] font-bold text-gray-300 tracking-[0.4em] uppercase mb-8 block group-hover:text-blue-500 transition-colors italic">0{i+1}</span>
+                <span className="text-[10px] font-bold text-gray-300 tracking-[0.4em] uppercase mb-8 block group-hover:text-blue-500 transition-colors italic">0{i + 1}</span>
                 <h3 className="text-4xl font-semibold text-gray-900 mb-6 tracking-tight">{v.title}</h3>
                 <p className="text-xl text-gray-400 leading-relaxed font-medium">{v.desc}</p>
               </div>
@@ -102,7 +102,7 @@ function About() {
             </div>
             <p className="text-2xl text-gray-400 font-medium max-w-md">Our technical hub where creativity meets precision. Open and ready for collaboration.</p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((member, i) => (
               <div key={i} className="group cursor-pointer">
@@ -130,7 +130,8 @@ function About() {
         </button>
       </footer>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         /* Local animation for the hero's vertical scroll indicator. */
         @keyframes scroll-line {
           0% { transform: translateY(-100%); }
