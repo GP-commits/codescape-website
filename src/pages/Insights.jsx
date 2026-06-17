@@ -1,64 +1,118 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { client, isSanityConfigured } from '../sanityClient';
+import Glance from '../components/Glance';
 
-/**
- * Insights Page Component
- * Combines a filterable case-study grid with static insight/article cards.
- */
+const fallbackCaseStudies = [
+  {
+    title: "Fintech Dashboard Redesign",
+    category: "Web Development",
+    description: "A complete overhaul of a financial analytics platform focusing on data visualization and user retention.",
+    body: "We partnered with a leading fintech company to completely reimagine their analytics dashboard. The project involved extensive user research, data visualization optimization, and a ground-up redesign of the interface. The result was a 40% increase in user engagement and a 25% reduction in support tickets.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBLfGClWTK0WS939fpVbh35ThAxjqxYbRI_-y2bzNLwiYbnyfodW1l4UdiCriK2JHJIzMaLiyK3tlb-lyLPMRUdT9qtLRKAgPR2BfH7kge3bL-jsP1LSi0Y_51VUSsDx0Ghypgyt16o7QMB3DLc4MchPXT5s32-JLjrrOQMqDzWnDlEvEoeXts40Wdf_qAvuFgZh_lXfgSXawbJSoxMqIcuWjy7awbb_47TexhSDSGmRyil8kZql53JLVuh4pzBOGHCBGWa1Pa3pdQ"
+  },
+  {
+    title: "Eco-Life Store",
+    category: "Web Development",
+    description: "Sustainable e-commerce platform built with Shopify Plus, featuring custom 3D product configurators.",
+    body: "Eco-Life needed an e-commerce solution that matched their commitment to sustainability. We built a custom Shopify Plus store with 3D product configurators, carbon-neutral shipping calculators, and a loyalty program that rewarded eco-conscious purchasing decisions.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC_m9amkGCVxD2MvTIvXZRyq7smdKAvTOkh8o2FVCLHoZkmsHV0ZQ5ohYvn1RFtiYilCS1vCK2WJ1hAJ-cNrY6IFJJ8WkAgBg8_luwPnEghWNdcOputjn6WcC45E03sgy_iHKHQsb8xUV8HG3LZ4iV2XwMjnEyR0cONfe0ruDd92dzDUkeI41XS_y66eNzTr_SSIV-oWbmT9OqsQJ4lDfnvleT5QbTT7dhG75TwADxs3ZeQLlBnhXtlU9w6nuB8_bEgavDKG87Dhvg"
+  },
+  {
+    title: "Nomad Travel App",
+    category: "Mobile Apps",
+    description: "An award-winning travel companion app designed for digital nomads to find workspaces worldwide.",
+    body: "The Nomad Travel App helps digital nomads discover coworking spaces, cafes with great WiFi, and accommodation worldwide. Built with React Native, the app features offline maps, community reviews, and an AI-powered recommendation engine.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCtPadYW-nZlSGgGah-Q7SRg2fJm1Dxo8d8TVbZINrRJVyOvee_6Q-F1bWxtOiFKnDmNbaheJzMYUMAYoB0V4jfwU6eipZuQP8vziYWrhNukVljv8LI-g-11wht-VUIw5G4g5jSdVXXpLb9IJCYw5QD7NgLxXQCkWtgV-ogMkG35YzKohnDovneaTtRf3naq7ZV20UE9sZOEGIM1AgOO-YWXZe2lBVc19_IAMfSQMBgh4vpymIWfn5P0mrw5Sf1x3-UwH_-ANf9fAk"
+  },
+  {
+    title: "Apex Corporate Identity",
+    category: "Branding",
+    description: "Rebranding a Fortune 500 logistics company to reflect speed, reliability, and modern technology.",
+    body: "Apex needed a complete brand overhaul to position themselves as a tech-forward logistics leader. We developed a new visual identity system including logo, typography, color palette, and comprehensive brand guidelines that unified their global presence.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCg4tFHYb1k3kjRyoTB2khJZGmqmZZggr2CFbxPFBy6-wgF0GCKXAsGtCD0h06oEbqK-YMVYGOZRe37roM0BaxNirZ2AepbO28eqAFyqkowNn6ZnzMM9__1NIoHPDr8If2q18HLRGNvoPqgyErNMcnclmr_sF6nM6i-alsIt6HDv3MKPKfHtkndBIrVKdyPNfTZ-007l2dVla7uX-HxyiPJIXlwuj9yqa2NAGSHdeukxiETihWiYOlh6oVdUIohmuWugCc6mktwkAA"
+  },
+  {
+    title: "HealthTech Portal",
+    category: "UI/UX Design",
+    description: "Patient-centric design system for a telemedicine provider, ensuring accessibility for all age groups.",
+    body: "We created a comprehensive design system for a telemedicine platform serving millions of patients. The system prioritizes accessibility, with WCAG 2.1 AA compliance, large touch targets, and high-contrast interfaces suitable for elderly users.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCnyzxLf-WzMjrRT8rD8tcmt1yhV9koZC7q-nqVAO-CIFB1qDGFdxmZ0myGZxxgZb9df8OApn65Ms3kDq3dPEljkZE6KbAVK7V0XyCvYeRvHRG9ha4_uvN5bbvHCf_t7ligYggm2xTtS-BIxWAG_xx-QLM5lOBUJpttTWgyeupr4yMiYehs5g4WiJPpcUjLlLBnA8IBpDpKukR54m4Fmiuo9a4FinVs4sPofVEY2VOwTZlNBixP3MeJjX3tTJJ-ZXXEARS6oVWCLt0"
+  },
+  {
+    title: "StartUp Strategy",
+    category: "Consulting",
+    description: "Digital transformation roadmap for a Series B funded SaaS startup entering the enterprise market.",
+    body: "We helped a Series B SaaS startup develop a comprehensive digital transformation roadmap for entering the enterprise market. The strategy included product positioning, technical architecture recommendations, and a phased go-to-market plan.",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBRbyqfG-ahoXLEyBMDGlr4t53uJwfiIMLKDEI3KpindUCez4Z77PllchC-6bfa4ettxaOK8vSTA1_QiGOXTQRgydpLqbIEsP_VygQyQpAR00og4ihkXF4T0dhBPHVoYzbDq-IHicSmJoRfu714nWrZ3rpvFH8uVsKdTLzLGHV4OdxyNKTaC2LWhUak5BvnVKFZ2j7o18w6huYXtGRCbfuRBvJtb9fpcakyDysIvZGxNy8XiybouQdVLtP9-M3ZpCEbXlC8eexY6V0"
+  }
+];
+
+const fallbackArticles = [
+  { title: "The Future of AI in Web Design", date: "May 12, 2026", category: "AI & Tech", body: "Artificial intelligence is revolutionizing web design. From automated layout generation to intelligent color palette suggestions, AI tools are empowering designers to work faster and smarter than ever before.", img: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800" },
+  { title: "Building Scalable SaaS Products", date: "April 28, 2026", category: "SaaS", body: "Building a SaaS product that scales requires careful architectural decisions from day one. In this article, we explore microservices, event-driven architecture, and the importance of designing for growth.", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800" },
+  { title: "Design Systems for Global Brands", date: "April 15, 2026", category: "Design", body: "Global brands need design systems that maintain consistency across regions while allowing for cultural adaptation. We break down the key components of an effective global design system.", img: "https://images.unsplash.com/photo-1586717791821-3f44a563eb4c?auto=format&fit=crop&q=80&w=800" }
+];
+
 function Insights() {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('All');
+  const [caseStudies, setCaseStudies] = useState(fallbackCaseStudies);
+  const [articles, setArticles] = useState(fallbackArticles);
+  const [isLoading, setIsLoading] = useState(true);
+  const [glanceItem, setGlanceItem] = useState(null);
+  const [glanceType, setGlanceType] = useState(null); // 'caseStudy' or 'article'
+  const [originRect, setOriginRect] = useState(null);
 
   const filters = ['All', 'Web Development', 'UI/UX Design', 'Mobile Apps', 'Branding', 'Consulting'];
 
-  const caseStudies = [
-    {
-      title: "Fintech Dashboard Redesign",
-      category: "Web Development",
-      description: "A complete overhaul of a financial analytics platform focusing on data visualization and user retention.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBLfGClWTK0WS939fpVbh35ThAxjqxYbRI_-y2bzNLwiYbnyfodW1l4UdiCriK2JHJIzMaLiyK3tlb-lyLPMRUdT9qtLRKAgPR2BfH7kge3bL-jsP1LSi0Y_51VUSsDx0Ghypgyt16o7QMB3DLc4MchPXT5s32-JLjrrOQMqDzWnDlEvEoeXts40Wdf_qAvuFgZh_lXfgSXawbJSoxMqIcuWjy7awbb_47TexhSDSGmRyil8kZql53JLVuh4pzBOGHCBGWa1Pa3pdQ"
-    },
-    {
-      title: "Eco-Life Store",
-      category: "Web Development", // Map 'E-commerce' to Web Development filter
-      description: "Sustainable e-commerce platform built with Shopify Plus, featuring custom 3D product configurators.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC_m9amkGCVxD2MvTIvXZRyq7smdKAvTOkh8o2FVCLHoZkmsHV0ZQ5ohYvn1RFtiYilCS1vCK2WJ1hAJ-cNrY6IFJJ8WkAgBg8_luwPnEghWNdcOputjn6WcC45E03sgy_iHKHQsb8xUV8HG3LZ4iV2XwMjnEyR0cONfe0ruDd92dzDUkeI41XS_y66eNzTr_SSIV-oWbmT9OqsQJ4lDfnvleT5QbTT7dhG75TwADxs3ZeQLlBnhXtlU9w6nuB8_bEgavDKG87Dhvg"
-    },
-    {
-      title: "Nomad Travel App",
-      category: "Mobile Apps",
-      description: "An award-winning travel companion app designed for digital nomads to find workspaces worldwide.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCtPadYW-nZlSGgGah-Q7SRg2fJm1Dxo8d8TVbZINrRJVyOvee_6Q-F1bWxtOiFKnDmNbaheJzMYUMAYoB0V4jfwU6eipZuQP8vziYWrhNukVljv8LI-g-11wht-VUIw5G4g5jSdVXXpLb9IJCYw5QD7NgLxXQCkWtgV-ogMkG35YzKohnDovneaTtRf3naq7ZV20UE9sZOEGIM1AgOO-YWXZe2lBVc19_IAMfSQMBgh4vpymIWfn5P0mrw5Sf1x3-UwH_-ANf9fAk"
-    },
-    {
-      title: "Apex Corporate Identity",
-      category: "Branding",
-      description: "Rebranding a Fortune 500 logistics company to reflect speed, reliability, and modern technology.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCg4tFHYb1k3kjRyoTB2khJZGmqmZZggr2CFbxPFBy6-wgF0GCKXAsGtCD0h06oEbqK-YMVYGOZRe37roM0BaxNirZ2AepbO28eqAFyqkowNn6ZnzMM9__1NIoHPDr8If2q18HLRGNvoPqgyErNMcnclmr_sF6nM6i-alsIt6HDv3MKPKfHtkndBIrVKdyPNfTZ-007l2dVla7uX-HxyiPJIXlwuj9yqa2NAGSHdeukxiETihWiYOlh6oVdUIohmuWugCc6mktwkAA"
-    },
-    {
-      title: "HealthTech Portal",
-      category: "UI/UX Design",
-      description: "Patient-centric design system for a telemedicine provider, ensuring accessibility for all age groups.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCnyzxLf-WzMjrRT8rD8tcmt1yhV9koZC7q-nqVAO-CIFB1qDGFdxmZ0myGZxxgZb9df8OApn65Ms3kDq3dPEljkZE6KbAVK7V0XyCvYeRvHRG9ha4_uvN5bbvHCf_t7ligYggm2xTtS-BIxWAG_xx-QLM5lOBUJpttTWgyeupr4yMiYehs5g4WiJPpcUjLlLBnA8IBpDpKukR54m4Fmiuo9a4FinVs4sPofVEY2VOwTZlNBixP3MeJjX3tTJJ-ZXXEARS6oVWCLt0"
-    },
-    {
-      title: "StartUp Strategy",
-      category: "Consulting",
-      description: "Digital transformation roadmap for a Series B funded SaaS startup entering the enterprise market.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBRbyqfG-ahoXLEyBMDGlr4t53uJwfiIMLKDEI3KpindUCez4Z77PllchC-6bfa4ettxaOK8vSTA1_QiGOXTQRgydpLqbIEsP_VygQyQpAR00og4ihkXF4T0dhBPHVoYzbDq-IHicSmJoRfu714nWrZ3rpvFH8uVsKdTLzLGHV4OdxyNKTaC2LWhUak5BvnVKFZ2j7o18w6huYXtGRCbfuRBvJtb9fpcakyDysIvZGxNy8XiybouQdVLtP9-M3ZpCEbXlC8eexY6V0"
+  useEffect(() => {
+    if (!isSanityConfigured) {
+      setIsLoading(false);
+      return;
     }
-  ];
 
-  const articles = [
-    { title: "The Future of AI in Web Design", date: "May 12, 2026", category: "AI & Tech", img: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800" },
-    { title: "Building Scalable SaaS Products", date: "April 28, 2026", category: "SaaS", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800" },
-    { title: "Design Systems for Global Brands", date: "April 15, 2026", category: "Design", img: "https://images.unsplash.com/photo-1586717791821-3f44a563eb4c?auto=format&fit=crop&q=80&w=800" }
-  ];
+    const fetchData = async () => {
+      try {
+        const [studiesData, articlesData] = await Promise.all([
+          client.fetch(`*[_type == "caseStudy"] { title, category, description, body, freshInsight, "image": image.asset->url }`),
+          client.fetch(`*[_type == "article"] { title, date, category, body, freshInsight, "img": img.asset->url }`)
+        ]);
+
+        if (studiesData && studiesData.length > 0) {
+          setCaseStudies(studiesData);
+        }
+        if (articlesData && articlesData.length > 0) {
+          setArticles(articlesData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch data from Sanity, falling back to static local data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const filteredProjects = activeFilter === 'All'
     ? caseStudies
     : caseStudies.filter(p => p.category === activeFilter);
   // Filter buttons update activeFilter above; this derived list keeps rendering
   // simple and avoids duplicating filter logic inside JSX.
+
+  const openGlance = (e, item, type) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setOriginRect({ top: rect.top, left: rect.left, width: rect.width, height: rect.height });
+    setGlanceItem(item);
+    setGlanceType(type);
+  };
+
+  const closeGlance = () => {
+    setGlanceItem(null);
+    setGlanceType(null);
+    setOriginRect(null);
+  };
 
   return (
     <div className="bg-white min-h-screen">
@@ -92,35 +146,51 @@ function Insights() {
       {/* Project Grid */}
       <section className="pb-32 px-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {filteredProjects.map((project, i) => (
-            <article key={i} className="group flex flex-col h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500">
-              <div className="relative w-full aspect-[4/3] overflow-hidden">
-                <img src={project.image} alt={project.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-10">
-                  <span className="text-white text-xs font-black tracking-widest uppercase">View Case Study →</span>
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex flex-col h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 animate-pulse">
+                <div className="w-full aspect-[4/3] bg-gray-200" />
+                <div className="p-10 flex flex-col flex-1">
+                  <div className="w-24 h-6 bg-gray-200 rounded-full mb-6" />
+                  <div className="w-3/4 h-8 bg-gray-200 rounded mb-4" />
+                  <div className="w-full h-4 bg-gray-200 rounded mb-2" />
+                  <div className="w-5/6 h-4 bg-gray-200 rounded mb-10" />
+                  <div className="w-20 h-4 bg-gray-200 rounded" />
                 </div>
               </div>
-              <div className="flex-1 p-10 flex flex-col">
-                <div className="flex items-center gap-2 mb-6">
-                  <span className="px-4 py-1.5 rounded-full bg-gray-100 text-gray-400 text-[10px] font-semibold tracking-widest uppercase">
-                    {project.category}
-                  </span>
+            ))
+          ) : (
+            filteredProjects.map((project, i) => (
+              <article
+                key={i}
+                className="group flex flex-col h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500 cursor-pointer"
+                onClick={(e) => openGlance(e, project, 'caseStudy')}
+              >
+                <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-50">
+                  <img src={project.image} alt={project.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-500 transition-colors tracking-tight">
-                  {project.title}
-                </h3>
-                <p className="text-gray-500 font-medium text-sm mb-10 flex-1 leading-relaxed">
-                  {project.description}
-                </p>
-                <div className="flex items-center gap-3 group-hover:translate-x-3 transition-transform duration-500">
-                  <span className="text-[10px] font-black text-gray-900 uppercase underline decoration-2 underline-offset-8">Read Story</span>
-                  <svg className="w-4 h-4 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
+                <div className="flex-1 p-10 flex flex-col">
+                  <div className="flex items-center gap-2 mb-6">
+                    <span className="px-4 py-1.5 rounded-full bg-gray-100 text-gray-400 text-[10px] font-semibold tracking-widest uppercase">
+                      {project.category}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-500 transition-colors tracking-tight">
+                    {project.title}
+                  </h3>
+                  <p className="text-gray-500 font-medium text-sm mb-10 flex-1 leading-relaxed">
+                    {project.description}
+                  </p>
+                  <div className="flex items-center gap-3 group-hover:translate-x-3 transition-transform duration-500">
+                    <span className="text-[10px] font-black text-gray-900 uppercase underline decoration-2 underline-offset-8">Read Story</span>
+                    <svg className="w-4 h-4 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))
+          )}
         </div>
       </section>
 
@@ -131,17 +201,33 @@ function Insights() {
           <p className="text-gray-500 leading-relaxed font-medium">Thought leadership and technical deep-dives.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {articles.map((article, i) => (
-            <article key={i} className="group cursor-pointer">
-              <div className="rounded-[40px] overflow-hidden aspect-video relative mb-8 shadow-lg">
-                <img src={article.img} alt={article.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="rounded-[40px] overflow-hidden aspect-video bg-gray-200 mb-8" />
+                <div className="px-2">
+                  <div className="w-20 h-3 bg-gray-200 rounded mb-3" />
+                  <div className="w-5/6 h-6 bg-gray-200 rounded" />
+                </div>
               </div>
-              <div className="px-2">
-                <p className="text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-3">{article.date}</p>
-                <h3 className="text-xl font-bold text-gray-900 leading-tight group-hover:text-blue-500 transition-colors">{article.title}</h3>
-              </div>
-            </article>
-          ))}
+            ))
+          ) : (
+            caseStudies.filter(s => s.freshInsight).map((study, i) => (
+              <article
+                key={i}
+                className="group cursor-pointer"
+                onClick={() => navigate(`/insights/${encodeURIComponent(study.title)}`)}
+              >
+                <div className="rounded-[40px] overflow-hidden aspect-video relative mb-8 shadow-lg bg-gray-100">
+                  <img src={study.image} alt={study.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                </div>
+                <div className="px-2">
+                  <p className="text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-3">{study.category}</p>
+                  <h3 className="text-xl font-bold text-gray-900 leading-tight group-hover:text-blue-500 transition-colors">{study.title}</h3>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </section>
 
@@ -163,6 +249,44 @@ function Insights() {
           </div>
         </div>
       </section>
+
+      {/* Glance Overlay */}
+      <Glance
+        isOpen={!!glanceItem}
+        onClose={closeGlance}
+        originRect={originRect}
+        onFullPage={glanceItem ? () => navigate(`/insights/${encodeURIComponent(glanceItem.title)}`) : undefined}
+      >
+        {glanceItem && glanceType === 'caseStudy' && (
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-6">{glanceItem.title}</h2>
+            {glanceItem.image && (
+              <div className="overflow-hidden mb-6 aspect-video bg-gray-100">
+                <img src={glanceItem.image} alt={glanceItem.title} className="w-full h-full object-cover" />
+              </div>
+            )}
+            <p className="text-gray-500 font-medium leading-relaxed mb-6">{glanceItem.description}</p>
+            {glanceItem.body && (
+              <p className="text-gray-600 leading-relaxed whitespace-pre-line">{glanceItem.body}</p>
+            )}
+          </div>
+        )}
+
+        {glanceItem && glanceType === 'article' && (
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-6">{glanceItem.title}</h2>
+            {glanceItem.img && (
+              <div className="overflow-hidden mb-6 aspect-video bg-gray-100">
+                <img src={glanceItem.img} alt={glanceItem.title} className="w-full h-full object-cover" />
+              </div>
+            )}
+            <p className="text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-4">{glanceItem.date}</p>
+            {glanceItem.body && (
+              <p className="text-gray-600 leading-relaxed whitespace-pre-line">{glanceItem.body}</p>
+            )}
+          </div>
+        )}
+      </Glance>
     </div>
   );
 }
