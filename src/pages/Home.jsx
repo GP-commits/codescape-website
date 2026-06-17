@@ -63,7 +63,7 @@ function PortfolioCard({ title, image, tags, color = "bg-gray-900", hasVideo = f
     <div className={`group relative flex-shrink-0 w-[450px] h-[550px] ${color} rounded-[40px] overflow-hidden cursor-pointer shadow-2xl transition-transform duration-500 hover:scale-[1.01]`}>
       <img src={image} alt={title} className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
       <div className="absolute inset-0 p-10 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/20 to-transparent">
-        <h3 className="text-3xl font-bold text-white mb-6 leading-tight max-w-[250px]">{title}</h3>
+        <h3 className="text-3xl font-bold text-white mb-6 leading-tight max-w-[350px]">{title}</h3>
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
             <span key={tag} className="px-4 py-2 rounded-full border border-white/20 text-white/70 text-xs font-medium backdrop-blur-md">
@@ -542,10 +542,10 @@ function Home() {
         </div>
       </section>
       <HorizontalScrollSection>
-        <PortfolioCard title="ERP Implementation" image="/portfolio/web.png" tags={["Web", "UX/UI design", "Mobile app"]} />
-        <PortfolioCard title="Store and Warehouse Automationl" image="/portfolio/graphic.png" tags={["Social media creative", "Banners", "Pitch decks", "Packaging"]} />
-        <PortfolioCard title="AI Automation" image="/portfolio/motion.png" tags={["Animated videos", "2D/3D motion", "AI video", "Editing"]} hasVideo={true} />
-        <PortfolioCard title="Digital Transformation" image="/portfolio/brand.png" tags={["Logo design", "Brand guidelines", "Stationery"]} />
+        <PortfolioCard title="ERP Implementation" image="/Horizontalscroll/ERP.png" tags={["Web", "UX/UI design", "Mobile app"]} />
+        <PortfolioCard title="Store and Warehouse Automation" image="/Horizontalscroll/warehouse.png" tags={["Social media creative", "Banners", "Pitch decks",]} />
+        <PortfolioCard title="AI Automation" image="/Horizontalscroll/ai.png" tags={["Animated videos", "2D/3D motion", "AI video",]} hasVideo={true} />
+        <PortfolioCard title="Digital Transformation" image="/Horizontalscroll/digital.png" tags={["Logo design", "Brand guidelines", "Stationery"]} />
       </HorizontalScrollSection>
       <ZuckerbergTestimonial />
       <section className="py-24 px-20 bg-white">
