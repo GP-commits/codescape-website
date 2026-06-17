@@ -29,11 +29,6 @@ function Navbar() {
           </NavLink>
         </li>
         <li>
-          <NavLink to="/careers" className={linkClass}>
-            Careers
-          </NavLink>
-        </li>
-        <li>
           <NavLink to="/about" className={linkClass}>
             About us
           </NavLink>
